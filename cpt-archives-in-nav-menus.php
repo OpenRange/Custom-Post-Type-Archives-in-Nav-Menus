@@ -5,7 +5,7 @@
  * Description: Adds an archive checkbox to the nav menu meta box for Custom Post Types that support archives
  * Author: Aaron D. Campbell
  * Author URI: http://xavisys.com/
- * Version: 0.0.1
+ * Version: 0.0.2 - Patch by ArtyShow (src: http://wordpress.org/support/topic/plugin-custom-post-type-archives-in-nav-menus-how-can-i-get-this-to-work )
  */
 
 class cptArchiveNavMenu {
@@ -14,42 +14,31 @@ class cptArchiveNavMenu {
 	}
 
 	public function add_filters() {
-		$post_type_args = array(
-			'show_in_nav_menus' => true
-		);
+		$post_type_args = array( 'show_in_nav_menus' => true);
 
 		$post_types = get_post_types( $post_type_args, 'object' );
 
 		foreach ( $post_types as $post_type ) {
-			if ( $post_type->has_archive ) {
+			if ( $post_type->has_archive && $post_type->show_in_nav_menus )
 				add_filter( 'nav_menu_items_' . $post_type->name, array( $this, 'add_archive_checkbox' ), null, 3 );
-			}
 		}
 	}
 
 	public function add_archive_checkbox( $posts, $args, $post_type ) {
 		global $_nav_menu_placeholder, $wp_rewrite;
 		$_nav_menu_placeholder = ( 0 > $_nav_menu_placeholder ) ? intval($_nav_menu_placeholder) - 1 : -1;
-
-		//dump( $post_type, '$post_type', 'htmlcomment' );
-
-		$archive_slug = $post_type['args']->has_archive === true ? $post_type['args']->rewrite['slug'] : $post_type['args']->has_archive;
-		if ( $post_type['args']->rewrite['with_front'] )
-			$archive_slug = substr( $wp_rewrite->front, 1 ) . $archive_slug;
-		else
-			$archive_slug = $wp_rewrite->root . $archive_slug;
-
 		array_unshift( $posts, (object) array(
+			'_add_to_top' => true,
 			'ID' => 0,
 			'object_id' => $_nav_menu_placeholder,
 			'post_content' => '',
 			'post_excerpt' => '',
+			'post_parent' => '',
 			'post_title' => $post_type['args']->labels->all_items,
 			'post_type' => 'nav_menu_item',
 			'type' => 'custom',
-			'url' => site_url( $archive_slug ),
+			'url' => get_post_type_archive_link($post_type['args']->name)
 		) );
-
 		return $posts;
 	}
 }
