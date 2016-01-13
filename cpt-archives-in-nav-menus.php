@@ -57,6 +57,7 @@ class cptArchiveNavMenu {
 			'object_id' => $_nav_menu_placeholder,
 			'post_content' => '',
 			'post_excerpt' => '',
+			'post_parent' => '',
 			'post_title' => $post_type['args']->labels->all_items,
 			'post_type' => 'nav_menu_item',
 			'type' => 'custom',
